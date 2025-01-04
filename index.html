@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>九九ゲーム（かわいいバージョン）</title>
+  <style>
+    /* 既存のスタイルはそのまま */
+    body {
+      font-family: 'Poppins', 'Comic Sans MS', sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #FFDEE9, #B5FFFC);
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    #game {
+      margin: 20px auto;
+      padding: 20px;
+      border: 5px solid #FFB6C1;
+      border-radius: 25px;
+      background-color: #FFF;
+      width: 320px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    h1 {
+      color: #FF69B4;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    #question {
+      font-size: 50px;
+      margin: 20px 0;
+      color: #FF4500;
+      background-color: #FFF3E0;
+      padding: 10px 20px;
+      border-radius: 15px;
+      border: 3px dashed #FFB74D;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #answer-display {
+      font-size: 22px;
+      margin: 15px 0;
+      background-color: #E0FFFF;
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid #87CEFA;
+    }
+
+    .calculator {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 20px auto;
+    }
+
+    .button {
+      font-size: 20px;
+      padding: 15px;
+      background-color: #FFD700;
+      color: white;
+      border: 2px solid #FF8C00;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 4px #FFB74D;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .button:hover {
+      background-color: #FFA500;
+      transform: translateY(-2px);
+    }
+
+    .button:active {
+      transform: scale(0.95);
+    }
+
+    .wide {
+      grid-column: span 3;
+      border-radius: 10px;
+    }
+
+    #feedback {
+      font-size: 20px;
+      margin: 15px 0;
+      color: #FF69B4;
+    }
+
+    #score, #timer {
+      font-size: 18px;
+      margin-top: 15px;
+      background-color: #FFF8DC;
+      padding: 10px;
+      border-radius: 10px;
+      display: inline-block;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* モバイル用スタイル */
+    @media (max-width: 480px) {
+      #game {
+        width: 90%; /* モバイルで横幅を広げる */
+      }
+
+      h1 {
+        font-size: 28px; /* タイトル文字サイズ調整 */
+      }
+
+      #question {
+        font-size: 8vw; /* 数字の大きさを画面に合わせる */
+      }
+
+      #answer-display {
+        font-size: 6vw;
+        padding: 8px;
+      }
+
+      .button {
+        font-size: 6vw;
+        padding: 10px;
+      }
+
+      .calculator {
+        gap: 8px;
+      }
+
+      #score, #timer {
+        font-size: 5vw;
+      }
+    }
+
+    /* パソコン用スタイル */
+    @media (min-width: 1024px) {
+      #game {
+        width: 480px; /* パソコン用に広げる */
+      }
+
+      h1 {
+        font-size: 36px; /* タイトル文字を大きく */
+      }
+
+      #question {
+        font-size: 40px; /* 質問を拡大 */
+      }
+
+      .button {
+        font-size: 24px;
+        padding: 20px;
+      }
+
+      #score, #timer {
+        font-size: 20px;
+      }
+
+      .calculator {
+        gap: 15px;
+      }
+    }
+  </style>
+
+</head>
+<body>
+  <div id="game">
+    <h1>九九ゲーム</h1>
+    <div id="question"></div>
+    <div id="answer-display">答え: </div>
+    <div class="calculator">
+      <button class="button" onclick="addNumber(1)">1</button>
+      <button class="button" onclick="addNumber(2)">2</button>
+      <button class="button" onclick="addNumber(3)">3</button>
+      <button class="button" onclick="addNumber(4)">4</button>
+      <button class="button" onclick="addNumber(5)">5</button>
+      <button class="button" onclick="addNumber(6)">6</button>
+      <button class="button" onclick="addNumber(7)">7</button>
+      <button class="button" onclick="addNumber(8)">8</button>
+      <button class="button" onclick="addNumber(9)">9</button>
+      <button class="button" onclick="addNumber(0)">0</button>
+      <button class="button" onclick="clearAnswer()">クリア</button>
+      <button class="button" onclick="submitAnswer()">答える</button>
+    </div>
+    <div id="feedback"></div>
+    <div id="score">スコア: 0</div>
+    <div id="timer">残り時間: 60秒</div>
+  </div>
+  <script>
+    const questionElement = document.getElementById('question');
+    const answerDisplay = document.getElementById('answer-display');
+    const feedbackElement = document.getElementById('feedback');
+    const scoreElement = document.getElementById('score');
+    const timerElement = document.getElementById('timer');
+
+    let score = 0;
+    let timeLeft = 60;
+    let currentQuestion;
+    let currentAnswer = '';
+
+    function generateQuestion() {
+      const num1 = Math.floor(Math.random() * 9) + 1;
+      const num2 = Math.floor(Math.random() * 9) + 1;
+      currentQuestion = { num1, num2, answer: num1 * num2 };
+      questionElement.textContent = `${num1} × ${num2} は？`;
+    }
+
+    function addNumber(num) {
+      currentAnswer += num;
+      answerDisplay.textContent = `答え: ${currentAnswer}`;
+    }
+
+    function clearAnswer() {
+      currentAnswer = '';
+      answerDisplay.textContent = '答え: ';
+    }
+
+    function submitAnswer() {
+      const playerAnswer = parseInt(currentAnswer, 10);
+      if (playerAnswer === currentQuestion.answer) {
+        score++;
+        feedbackElement.textContent = '正解！';
+      } else {
+        feedbackElement.textContent = `不正解！正しい答えは ${currentQuestion.answer} です。`;
+      }
+      scoreElement.textContent = `スコア: ${score}`;
+      clearAnswer();
+      generateQuestion();
+    }
+
+    function startTimer() {
+      const timer = setInterval(() => {
+        timeLeft--;
+        timerElement.textContent = `残り時間: ${timeLeft}秒`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      feedbackElement.textContent = `ゲーム終了！最終スコアは ${score} 点です。`;
+      document.querySelectorAll('.button').forEach(button => button.disabled = true);
+    }
+
+    generateQuestion();
+    startTimer();
+  </script>
+</body>
+</html>
