@@ -1,32 +1,35 @@
-<!DOCTYPE html>
+<!DOCTYPE html>  
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>九九ゲーム（かわいいバージョン）</title>
+  <title>九九ゲーム</title>
   <style>
-    /* 既存のスタイルはそのまま */
+    /* Darker, more masculine design */
     body {
-      font-family: 'Poppins', 'Comic Sans MS', sans-serif;
+      font-family: 'Poppins', sans-serif;
       text-align: center;
-      background: linear-gradient(135deg, #FFDEE9, #B5FFFC);
-      color: #333;
+      background: linear-gradient(135deg, #2E3B4E, #1A2630); /* Darker gradient for a bold feel */
+      color: #EAEAEA; /* Light text color for readability */
       margin: 0;
       padding: 0;
+      height: 100vh;
+      position: relative;
     }
 
     #game {
       margin: 20px auto;
       padding: 20px;
-      border: 5px solid #FFB6C1;
-      border-radius: 25px;
-      background-color: #FFF;
+      border: 5px solid #4A6D7C; /* Muted, masculine border color */
+      border-radius: 15px;
+      background-color: #333;
       width: 320px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      display: none;
     }
 
     h1 {
-      color: #FF69B4;
+      color: #FFA500; /* Orange for a vibrant accent */
       font-size: 32px;
       margin-bottom: 20px;
     }
@@ -34,21 +37,21 @@
     #question {
       font-size: 50px;
       margin: 20px 0;
-      color: #FF4500;
-      background-color: #FFF3E0;
+      color: #FFD700; /* Gold for emphasis */
+      background-color: #444;
       padding: 10px 20px;
       border-radius: 15px;
-      border: 3px dashed #FFB74D;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 3px solid #FF8C00;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     #answer-display {
       font-size: 22px;
       margin: 15px 0;
-      background-color: #E0FFFF;
+      background-color: #1F2A37; /* Darker background */
       padding: 10px;
       border-radius: 10px;
-      border: 2px solid #87CEFA;
+      border: 2px solid #3D4A56;
     }
 
     .calculator {
@@ -61,17 +64,17 @@
     .button {
       font-size: 20px;
       padding: 15px;
-      background-color: #FFD700;
+      background-color: #5F7D8E; /* Steel-blue background */
       color: white;
-      border: 2px solid #FF8C00;
+      border: 2px solid #4A6D7C; /* Muted border */
       border-radius: 50%;
       cursor: pointer;
-      box-shadow: 0 4px #FFB74D;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
       transition: transform 0.2s ease, background-color 0.2s ease;
     }
 
     .button:hover {
-      background-color: #FFA500;
+      background-color: #4A6D7C; /* Slightly darker blue on hover */
       transform: translateY(-2px);
     }
 
@@ -87,31 +90,84 @@
     #feedback {
       font-size: 20px;
       margin: 15px 0;
-      color: #FF69B4;
+      color: #FF6347; /* Red for important feedback */
     }
 
     #score, #timer {
       font-size: 18px;
       margin-top: 15px;
-      background-color: #FFF8DC;
+      background-color: #3A4A56; /* Dark grayish background */
       padding: 10px;
       border-radius: 10px;
       display: inline-block;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
 
-    /* モバイル用スタイル */
+    #start-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      padding: 15px 30px;
+      background-color: #FF6347; /* Bold red button */
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s ease;
+    }
+
+    #start-btn:hover {
+      background-color: #FF4500; /* Slightly darker red on hover */
+    }
+
+    #game-over-message {
+      font-size: 24px;
+      font-weight: bold;
+      color: #FF6347; /* Red message to highlight */
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #444; /* Darker background for contrast */
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      display: none;
+    }
+
+    #restart-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      padding: 15px 30px;
+      background-color: #FF6347; /* Bold red button */
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s ease;
+      display: none;
+    }
+
+    #restart-btn:hover {
+      background-color: #FF4500;
+    }
+
+    /* Mobile styles */
     @media (max-width: 480px) {
       #game {
-        width: 90%; /* モバイルで横幅を広げる */
+        width: 90%;
       }
 
       h1 {
-        font-size: 28px; /* タイトル文字サイズ調整 */
+        font-size: 28px;
       }
 
       #question {
-        font-size: 8vw; /* 数字の大きさを画面に合わせる */
+        font-size: 8vw;
       }
 
       #answer-display {
@@ -133,18 +189,18 @@
       }
     }
 
-    /* パソコン用スタイル */
+    /* Desktop styles */
     @media (min-width: 1024px) {
       #game {
-        width: 480px; /* パソコン用に広げる */
+        width: 480px;
       }
 
       h1 {
-        font-size: 36px; /* タイトル文字を大きく */
+        font-size: 36px;
       }
 
       #question {
-        font-size: 40px; /* 質問を拡大 */
+        font-size: 40px;
       }
 
       .button {
@@ -161,9 +217,10 @@
       }
     }
   </style>
-
 </head>
 <body>
+  <button id="start-btn" onclick="startGame()">ゲームスタート</button>
+
   <div id="game">
     <h1>九九ゲーム</h1>
     <div id="question"></div>
@@ -186,12 +243,18 @@
     <div id="score">スコア: 0</div>
     <div id="timer">残り時間: 60秒</div>
   </div>
+
+  <div id="game-over-message" style="display: none;"></div>
+  <button id="restart-btn" onclick="restartGame()">もう1度遊ぶ</button>
+
   <script>
     const questionElement = document.getElementById('question');
     const answerDisplay = document.getElementById('answer-display');
     const feedbackElement = document.getElementById('feedback');
     const scoreElement = document.getElementById('score');
     const timerElement = document.getElementById('timer');
+    const startButton = document.getElementById('start-btn');
+    const restartButton = document.getElementById('restart-btn');
 
     let score = 0;
     let timeLeft = 60;
@@ -240,13 +303,33 @@
       }, 1000);
     }
 
+    function startGame() {
+      startButton.style.display = 'none';
+      document.getElementById('game').style.display = 'block';
+      restartButton.style.display = 'none';
+      generateQuestion();
+      startTimer();
+    }
+
     function endGame() {
-      feedbackElement.textContent = `ゲーム終了！最終スコアは ${score} 点です。`;
+      const gameOverMessage = document.getElementById('game-over-message');
+      gameOverMessage.textContent = `ゲーム終了！最終スコアは ${score} 点でした！またあそんでね！`;
+      gameOverMessage.style.display = 'block';
+      restartButton.style.display = 'block';
+      document.getElementById('game').style.display = 'none';
       document.querySelectorAll('.button').forEach(button => button.disabled = true);
     }
 
-    generateQuestion();
-    startTimer();
+    function restartGame() {
+      score = 0;
+      timeLeft = 60;
+      scoreElement.textContent = `スコア: 0`;
+      timerElement.textContent = `残り時間: 60秒`;
+      feedbackElement.textContent = '';
+      startButton.style.display = 'block';
+      restartButton.style.display = 'none';
+      document.getElementById('game').style.display = 'none';
+    }
   </script>
 </body>
 </html>
