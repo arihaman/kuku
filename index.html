@@ -156,6 +156,50 @@
       background-color: #FF4500;
     }
 
+    #circle {
+  display: none;
+  width: 100px;
+  height: 100px;
+  border: 20px solid #e14444;
+  border-radius: 50%;
+  background-color: transparent; 
+    position: absolute;
+  top: 20%;
+  left: 60%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+#cross {
+  display: none;
+  width: 130px;
+  height: 130px;
+  position: absolute;
+  top: 20%;
+  left: 60%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+#cross:before, #cross:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 20px;
+  background-color: #305ee7; /* バツの色 */
+  transform-origin: center;
+}
+
+#cross:before {
+  transform: translate(-50%, -50%) rotate(45deg); /* 斜めの線 */
+}
+
+#cross:after {
+  transform: translate(-50%, -50%) rotate(-45deg); /* 反対の斜めの線 */
+}
+
     /* Mobile styles */
     @media (max-width: 480px) {
       #game {
@@ -224,7 +268,7 @@
   <div id="game">
     <h1>九九ゲーム</h1>
     <div id="question"></div>
-    <div id="answer-display">答え: </div>
+    <div id="answer-display">こたえ: </div>
     <div class="calculator">
       <button class="button" onclick="addNumber(1)">1</button>
       <button class="button" onclick="addNumber(2)">2</button>
@@ -237,15 +281,21 @@
       <button class="button" onclick="addNumber(9)">9</button>
       <button class="button" onclick="addNumber(0)">0</button>
       <button class="button" onclick="clearAnswer()">クリア</button>
-      <button class="button" onclick="submitAnswer()">答える</button>
+      <button class="button" onclick="submitAnswer()">こたえる</button>
     </div>
     <div id="feedback"></div>
     <div id="score">スコア: 0</div>
-    <div id="timer">残り時間: 60秒</div>
+    <div id="timer">のこり: 60びょう</div>
   </div>
 
   <div id="game-over-message" style="display: none;"></div>
-  <button id="restart-btn" onclick="restartGame()">もう1度遊ぶ</button>
+  <button id="restart-btn" onclick="restartGame()">もっとあそぶ</button>
+
+  <div id="circle"></div>
+  <audio id="pingpong-sound" src="pingpong.mp3"></audio>
+
+  <div id="cross"></div>
+  <audio id="wrong-sound" src="wrong.mp3"></audio>
 
   <script>
     const questionElement = document.getElementById('question');
@@ -255,6 +305,8 @@
     const timerElement = document.getElementById('timer');
     const startButton = document.getElementById('start-btn');
     const restartButton = document.getElementById('restart-btn');
+    const circle = document.getElementById('circle');
+    const cross = document.getElementById('cross');
 
     let score = 0;
     let timeLeft = 60;
@@ -265,36 +317,54 @@
       const num1 = Math.floor(Math.random() * 9) + 1;
       const num2 = Math.floor(Math.random() * 9) + 1;
       currentQuestion = { num1, num2, answer: num1 * num2 };
-      questionElement.textContent = `${num1} × ${num2} は？`;
+      questionElement.textContent = `${num1} × ${num2} =？`;
     }
 
     function addNumber(num) {
       currentAnswer += num;
-      answerDisplay.textContent = `答え: ${currentAnswer}`;
+      answerDisplay.textContent = `こたえ: ${currentAnswer}`;
     }
 
     function clearAnswer() {
       currentAnswer = '';
-      answerDisplay.textContent = '答え: ';
+      answerDisplay.textContent = 'こたえ: ';
     }
 
     function submitAnswer() {
       const playerAnswer = parseInt(currentAnswer, 10);
       if (playerAnswer === currentQuestion.answer) {
         score++;
-        feedbackElement.textContent = '正解！';
+        feedbackElement.textContent = 'せいかい！';
+        showCircle(); // 正解したら〇を表示
       } else {
-        feedbackElement.textContent = `不正解！正しい答えは ${currentQuestion.answer} です。`;
+        feedbackElement.textContent = `ざんねん！こたえは ${currentQuestion.answer} です。`;
+        showCross();
       }
       scoreElement.textContent = `スコア: ${score}`;
       clearAnswer();
       generateQuestion();
     }
 
+    function showCircle() {
+      document.getElementById('pingpong-sound').play(); // ピンポン音を鳴らす
+      circle.style.display = 'block'; // 〇を表示
+      setTimeout(() => {
+        circle.style.display = 'none'; // 3秒後に非表示
+      }, 500);
+    }
+
+    function showCross() {
+      document.getElementById('wrong-sound').play(); // ピンポン音を鳴らす
+      cross.style.display = 'block'; // ✖を表示
+      setTimeout(() => {
+        cross.style.display = 'none'; // 3秒後に非表示
+      }, 500);
+    }
+
     function startTimer() {
       const timer = setInterval(() => {
         timeLeft--;
-        timerElement.textContent = `残り時間: ${timeLeft}秒`;
+        timerElement.textContent = `のこり: ${timeLeft}びょう`;
 
         if (timeLeft <= 0) {
           clearInterval(timer);
@@ -313,7 +383,7 @@
 
     function endGame() {
       const gameOverMessage = document.getElementById('game-over-message');
-      gameOverMessage.textContent = `ゲーム終了！最終スコアは ${score} 点でした！またあそんでね！`;
+      gameOverMessage.textContent = `おしまい！ ${score} 点でした！またあそんでね！`;
       gameOverMessage.style.display = 'block';
       restartButton.style.display = 'block';
       document.getElementById('game').style.display = 'none';
@@ -321,15 +391,8 @@
     }
 
     function restartGame() {
-      score = 0;
-      timeLeft = 60;
-      scoreElement.textContent = `スコア: 0`;
-      timerElement.textContent = `残り時間: 60秒`;
-      feedbackElement.textContent = '';
-      startButton.style.display = 'block';
-      restartButton.style.display = 'none';
-      document.getElementById('game').style.display = 'none';
-    }
+  location.reload(); // ページをリロードして初期状態に戻す
+}
   </script>
 </body>
 </html>
